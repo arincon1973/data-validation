@@ -1,5 +1,8 @@
 package com.example.datavalidator;
 
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -9,17 +12,58 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(DataValidatorController.class)
-@Import(RulesConfig.class)
+@Import({RulesConfig.class, SimpleMeterRegistry.class})
 class DataValidatorControllerTests {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private MeterRegistry meterRegistry;
+
+    @Test
+    void recordsDurationOfEachRule() throws Exception {
+        // The registry is shared with the other tests in this class.
+        meterRegistry.clear();
+        mockMvc.perform(post("/validate")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "studentInfo": {
+                                    "firstName": "Jane",
+                                    "lastName": "Smith",
+                                    "ssn": "123456789",
+                                    "dateOfBirth": "2013-09-02"
+                                  },
+                                  "dependencyStatus": "dependent",
+                                  "maritalStatus": "single",
+                                  "household": {
+                                    "numberInHousehold": 4,
+                                    "numberInCollege": 1
+                                  },
+                                  "income": {
+                                    "studentIncome": 5000,
+                                    "parentIncome": 65000
+                                  },
+                                  "stateOfResidence": "CA"
+                                }
+                                """))
+                .andExpect(status().isOk());
+
+        Timer ageTimer = meterRegistry.get("validation.rule")
+                .tag("rule", "AgeRule")
+                .tag("result", "failed")
+                .timer();
+        assertThat(ageTimer.count()).isEqualTo(1);
+        assertThat(meterRegistry.get("validation.rule").timers()).hasSize(3);
+    }
 
     @Test
     void reportsValidationPassed() throws Exception {

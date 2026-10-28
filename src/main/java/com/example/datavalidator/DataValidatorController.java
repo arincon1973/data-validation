@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
@@ -17,9 +19,11 @@ public class DataValidatorController {
     private static final LocalDate SCHOOL_START = LocalDate.of(2027, 9, 1);
 
     private final List<Rule> rules;
+    private final MeterRegistry meterRegistry;
 
-    public DataValidatorController(List<Rule> rules) {
+    public DataValidatorController(List<Rule> rules, MeterRegistry meterRegistry) {
         this.rules = rules;
+        this.meterRegistry = meterRegistry;
     }
 
     public record StudentInfo(
@@ -52,7 +56,12 @@ public class DataValidatorController {
         List<ValidationEntry> entries = new ArrayList<>();
         boolean allPassed = true;
         for (Rule rule : rules) {
-            if (!rule.validate(request, entries, SCHOOL_START)) {
+            Timer.Sample sample = Timer.start(meterRegistry);
+            boolean passed = rule.validate(request, entries, SCHOOL_START);
+            sample.stop(meterRegistry.timer("validation.rule",
+                    "rule", rule.getClass().getSimpleName(),
+                    "result", passed ? "passed" : "failed"));
+            if (!passed) {
                 allPassed = false;
             }
         }
