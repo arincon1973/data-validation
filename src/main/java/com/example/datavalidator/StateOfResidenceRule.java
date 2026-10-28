@@ -18,6 +18,11 @@ public class StateOfResidenceRule implements Rule {
             "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY");
 
     @Override
+    public float ruleOrder() {
+        return 4;
+    }
+
+    @Override
     public boolean validate(ValidationRequest request, List<ValidationEntry> entries, LocalDate schoolStart) {
         String state = request.stateOfResidence();
 

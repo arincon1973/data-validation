@@ -9,6 +9,11 @@ import com.example.datavalidator.DataValidatorController.ValidationRequest;
 public class StudentIncomeRule implements Rule {
 
     @Override
+    public float ruleOrder() {
+        return 3;
+    }
+
+    @Override
     public boolean validate(ValidationRequest request, List<ValidationEntry> entries, LocalDate schoolStart) {
         long studentIncome = request.income().studentIncome();
 

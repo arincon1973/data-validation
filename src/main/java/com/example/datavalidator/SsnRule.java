@@ -9,6 +9,11 @@ import com.example.datavalidator.DataValidatorController.ValidationRequest;
 public class SsnRule implements Rule {
 
     @Override
+    public float ruleOrder() {
+        return 2;
+    }
+
+    @Override
     public boolean validate(ValidationRequest request, List<ValidationEntry> entries, LocalDate schoolStart) {
         // The SSN itself is left out of the message so it doesn't end up in responses or logs.
         if (!SsnValidator.isValid(request.studentInfo().ssn())) {

@@ -62,7 +62,7 @@ class DataValidatorControllerTests {
                 .tag("result", "failed")
                 .timer();
         assertThat(ageTimer.count()).isEqualTo(1);
-        assertThat(meterRegistry.get("validation.rule").timers()).hasSize(5);
+        assertThat(meterRegistry.get("validation.rule").timers()).hasSize(9);
     }
 
     @Test
@@ -91,19 +91,122 @@ class DataValidatorControllerTests {
                                 }
                                 """))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.results.length()").value(6))
+                .andExpect(jsonPath("$.results.length()").value(11))
                 .andExpect(jsonPath("$.results[0].description").value("Status"))
                 .andExpect(jsonPath("$.results[0].status").value("Validation passed"))
-                .andExpect(jsonPath("$.results[1].description").value("Age"))
+                .andExpect(jsonPath("$.results[1].description").value("Dependency Status"))
                 .andExpect(jsonPath("$.results[1].status").value("Valid"))
-                .andExpect(jsonPath("$.results[2].description").value("SSN"))
+                .andExpect(jsonPath("$.results[2].description").value("Marital Status"))
                 .andExpect(jsonPath("$.results[2].status").value("Valid"))
-                .andExpect(jsonPath("$.results[3].description").value("Student Income"))
+                .andExpect(jsonPath("$.results[3].description").value("Conflicting Values"))
                 .andExpect(jsonPath("$.results[3].status").value("Valid"))
-                .andExpect(jsonPath("$.results[4].description").value("State of Residence"))
+                .andExpect(jsonPath("$.results[4].description").value("Age"))
                 .andExpect(jsonPath("$.results[4].status").value("Valid"))
-                .andExpect(jsonPath("$.results[5].description").value("Household"))
-                .andExpect(jsonPath("$.results[5].status").value("Valid"));
+                .andExpect(jsonPath("$.results[5].description").value("SSN"))
+                .andExpect(jsonPath("$.results[5].status").value("Valid"))
+                .andExpect(jsonPath("$.results[6].description").value("Student Income"))
+                .andExpect(jsonPath("$.results[6].status").value("Valid"))
+                .andExpect(jsonPath("$.results[7].description").value("State of Residence"))
+                .andExpect(jsonPath("$.results[7].status").value("Valid"))
+                .andExpect(jsonPath("$.results[8].description").value("Household"))
+                .andExpect(jsonPath("$.results[8].status").value("Valid"))
+                .andExpect(jsonPath("$.results[9].description").value("Parent Income"))
+                .andExpect(jsonPath("$.results[9].status").value("Valid"))
+                .andExpect(jsonPath("$.results[10].description").value("Spouse"))
+                .andExpect(jsonPath("$.results[10].status").value("Valid"));
+    }
+
+    @Test
+    void reportsDependentWithoutParentIncome() throws Exception {
+        mockMvc.perform(post("/validate")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "studentInfo": {
+                                    "firstName": "Jane",
+                                    "lastName": "Smith",
+                                    "ssn": "123456789",
+                                    "dateOfBirth": "2003-05-15"
+                                  },
+                                  "dependencyStatus": "dependent",
+                                  "maritalStatus": "single",
+                                  "household": {
+                                    "numberInHousehold": 4,
+                                    "numberInCollege": 1
+                                  },
+                                  "income": {
+                                    "studentIncome": 5000
+                                  },
+                                  "stateOfResidence": "CA"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.results[0].status").value("Validation failed"))
+                .andExpect(jsonPath("$.results[9].description").value("Parent Income"))
+                .andExpect(jsonPath("$.results[9].status").value("Parent income is required for dependent students"));
+    }
+
+    @Test
+    void reportsDependentAndMarriedConflict() throws Exception {
+        mockMvc.perform(post("/validate")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "studentInfo": {
+                                    "firstName": "Jane",
+                                    "lastName": "Smith",
+                                    "ssn": "123456789",
+                                    "dateOfBirth": "2003-05-15"
+                                  },
+                                  "dependencyStatus": "dependent",
+                                  "maritalStatus": "married",
+                                  "household": {
+                                    "numberInHousehold": 4,
+                                    "numberInCollege": 1
+                                  },
+                                  "income": {
+                                    "studentIncome": 5000,
+                                    "parentIncome": 65000
+                                  },
+                                  "stateOfResidence": "CA"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.results[0].status").value("Validation failed"))
+                .andExpect(jsonPath("$.results[3].description").value("Conflicting Values"))
+                .andExpect(jsonPath("$.results[3].status").value("Student cannot be both dependent and married"));
+    }
+
+    @Test
+    void reportsInvalidMaritalStatus() throws Exception {
+        mockMvc.perform(post("/validate")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "studentInfo": {
+                                    "firstName": "Jane",
+                                    "lastName": "Smith",
+                                    "ssn": "123456789",
+                                    "dateOfBirth": "2003-05-15"
+                                  },
+                                  "dependencyStatus": "dependent",
+                                  "maritalStatus": "divorced",
+                                  "household": {
+                                    "numberInHousehold": 4,
+                                    "numberInCollege": 1
+                                  },
+                                  "income": {
+                                    "studentIncome": 5000,
+                                    "parentIncome": 65000
+                                  },
+                                  "stateOfResidence": "CA"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.results[0].status").value("Validation failed"))
+                .andExpect(jsonPath("$.results[2].description").value("Marital Status"))
+                .andExpect(jsonPath("$.results[2].status")
+                        .value("Invalid value (divorced), expected single or married"));
     }
 
     @Test
@@ -133,8 +236,8 @@ class DataValidatorControllerTests {
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.results[0].status").value("Validation failed"))
-                .andExpect(jsonPath("$.results[5].description").value("Household"))
-                .andExpect(jsonPath("$.results[5].status")
+                .andExpect(jsonPath("$.results[8].description").value("Household"))
+                .andExpect(jsonPath("$.results[8].status")
                         .value("Dependent student household must have at least 2 people (1, < 2)"));
     }
 
@@ -165,8 +268,8 @@ class DataValidatorControllerTests {
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.results[0].status").value("Validation failed"))
-                .andExpect(jsonPath("$.results[4].description").value("State of Residence"))
-                .andExpect(jsonPath("$.results[4].status").value("Invalid US state abbreviation (XX)"));
+                .andExpect(jsonPath("$.results[7].description").value("State of Residence"))
+                .andExpect(jsonPath("$.results[7].status").value("Invalid US state abbreviation (XX)"));
     }
 
     @Test
@@ -196,8 +299,8 @@ class DataValidatorControllerTests {
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.results[0].status").value("Validation failed"))
-                .andExpect(jsonPath("$.results[3].description").value("Student Income"))
-                .andExpect(jsonPath("$.results[3].status")
+                .andExpect(jsonPath("$.results[6].description").value("Student Income"))
+                .andExpect(jsonPath("$.results[6].status")
                         .value("Student income cannot be negative (-500, < 0)"));
     }
 
@@ -228,8 +331,8 @@ class DataValidatorControllerTests {
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.results[0].status").value("Validation failed"))
-                .andExpect(jsonPath("$.results[2].description").value("SSN"))
-                .andExpect(jsonPath("$.results[2].status")
+                .andExpect(jsonPath("$.results[5].description").value("SSN"))
+                .andExpect(jsonPath("$.results[5].status")
                         .value("Invalid SSN format (expected 9 digits or xxx-xx-xxxx)"));
     }
 
@@ -261,8 +364,8 @@ class DataValidatorControllerTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.results[0].description").value("Status"))
                 .andExpect(jsonPath("$.results[0].status").value("Validation failed"))
-                .andExpect(jsonPath("$.results[1].description").value("Age"))
-                .andExpect(jsonPath("$.results[1].status").value("Student too young (13 years old, < 14)"));
+                .andExpect(jsonPath("$.results[4].description").value("Age"))
+                .andExpect(jsonPath("$.results[4].status").value("Student too young (13 years old, < 14)"));
     }
 
     @Test
@@ -299,7 +402,7 @@ class DataValidatorControllerTests {
     }
 
     @Test
-    void acceptsPartialSpouseInfo() throws Exception {
+    void reportsIncompleteSpouseInfoForMarried() throws Exception {
         mockMvc.perform(post("/validate")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -326,7 +429,11 @@ class DataValidatorControllerTests {
                                 }
                                 """))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.results[0].status").value("Validation passed"));
+                .andExpect(jsonPath("$.results[0].status").value("Validation failed"))
+                .andExpect(jsonPath("$.results[10].description").value("Spouse"))
+                .andExpect(jsonPath("$.results[10].status").value("Spouse last name is required for married students"))
+                .andExpect(jsonPath("$.results[11].description").value("Spouse"))
+                .andExpect(jsonPath("$.results[11].status").value("Spouse SSN is required for married students"));
     }
 
     @Test

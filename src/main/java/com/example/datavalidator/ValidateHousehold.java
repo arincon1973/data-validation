@@ -14,6 +14,11 @@ public class ValidateHousehold implements Rule {
     private static final int MIN_DEPENDENT_HOUSEHOLD = 2;
 
     @Override
+    public float ruleOrder() {
+        return 5;
+    }
+
+    @Override
     public boolean validate(ValidationRequest request, List<ValidationEntry> entries, LocalDate schoolStart) {
         Household household = request.household();
         int inHousehold = household.numberInHousehold();

@@ -9,4 +9,6 @@ import java.util.List;
 public interface Rule {
 
     boolean validate(ValidationRequest request, List<ValidationEntry> entries, LocalDate schoolStart);
+
+    float ruleOrder();
 }

@@ -13,6 +13,11 @@ public class AgeRule implements Rule {
     private static final int MAX_AGE = 120;
 
     @Override
+    public float ruleOrder() {
+        return 1;
+    }
+
+    @Override
     public boolean validate(ValidationRequest request, List<ValidationEntry> entries, LocalDate schoolStart) {
         LocalDate dateOfBirth = request.studentInfo().dateOfBirth();
         int age = Period.between(dateOfBirth, schoolStart).getYears();
