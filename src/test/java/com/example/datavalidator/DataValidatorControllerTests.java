@@ -62,7 +62,7 @@ class DataValidatorControllerTests {
                 .tag("result", "failed")
                 .timer();
         assertThat(ageTimer.count()).isEqualTo(1);
-        assertThat(meterRegistry.get("validation.rule").timers()).hasSize(3);
+        assertThat(meterRegistry.get("validation.rule").timers()).hasSize(5);
     }
 
     @Test
@@ -91,11 +91,146 @@ class DataValidatorControllerTests {
                                 }
                                 """))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.results.length()").value(2))
+                .andExpect(jsonPath("$.results.length()").value(6))
                 .andExpect(jsonPath("$.results[0].description").value("Status"))
                 .andExpect(jsonPath("$.results[0].status").value("Validation passed"))
                 .andExpect(jsonPath("$.results[1].description").value("Age"))
-                .andExpect(jsonPath("$.results[1].status").value("Valid"));
+                .andExpect(jsonPath("$.results[1].status").value("Valid"))
+                .andExpect(jsonPath("$.results[2].description").value("SSN"))
+                .andExpect(jsonPath("$.results[2].status").value("Valid"))
+                .andExpect(jsonPath("$.results[3].description").value("Student Income"))
+                .andExpect(jsonPath("$.results[3].status").value("Valid"))
+                .andExpect(jsonPath("$.results[4].description").value("State of Residence"))
+                .andExpect(jsonPath("$.results[4].status").value("Valid"))
+                .andExpect(jsonPath("$.results[5].description").value("Household"))
+                .andExpect(jsonPath("$.results[5].status").value("Valid"));
+    }
+
+    @Test
+    void reportsInvalidHousehold() throws Exception {
+        mockMvc.perform(post("/validate")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "studentInfo": {
+                                    "firstName": "Jane",
+                                    "lastName": "Smith",
+                                    "ssn": "123456789",
+                                    "dateOfBirth": "2003-05-15"
+                                  },
+                                  "dependencyStatus": "dependent",
+                                  "maritalStatus": "single",
+                                  "household": {
+                                    "numberInHousehold": 1,
+                                    "numberInCollege": 1
+                                  },
+                                  "income": {
+                                    "studentIncome": 5000,
+                                    "parentIncome": 65000
+                                  },
+                                  "stateOfResidence": "CA"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.results[0].status").value("Validation failed"))
+                .andExpect(jsonPath("$.results[5].description").value("Household"))
+                .andExpect(jsonPath("$.results[5].status")
+                        .value("Dependent student household must have at least 2 people (1, < 2)"));
+    }
+
+    @Test
+    void reportsInvalidStateOfResidence() throws Exception {
+        mockMvc.perform(post("/validate")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "studentInfo": {
+                                    "firstName": "Jane",
+                                    "lastName": "Smith",
+                                    "ssn": "123456789",
+                                    "dateOfBirth": "2003-05-15"
+                                  },
+                                  "dependencyStatus": "dependent",
+                                  "maritalStatus": "single",
+                                  "household": {
+                                    "numberInHousehold": 4,
+                                    "numberInCollege": 1
+                                  },
+                                  "income": {
+                                    "studentIncome": 5000,
+                                    "parentIncome": 65000
+                                  },
+                                  "stateOfResidence": "XX"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.results[0].status").value("Validation failed"))
+                .andExpect(jsonPath("$.results[4].description").value("State of Residence"))
+                .andExpect(jsonPath("$.results[4].status").value("Invalid US state abbreviation (XX)"));
+    }
+
+    @Test
+    void reportsNegativeStudentIncome() throws Exception {
+        mockMvc.perform(post("/validate")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "studentInfo": {
+                                    "firstName": "Jane",
+                                    "lastName": "Smith",
+                                    "ssn": "123456789",
+                                    "dateOfBirth": "2003-05-15"
+                                  },
+                                  "dependencyStatus": "dependent",
+                                  "maritalStatus": "single",
+                                  "household": {
+                                    "numberInHousehold": 4,
+                                    "numberInCollege": 1
+                                  },
+                                  "income": {
+                                    "studentIncome": -500,
+                                    "parentIncome": 65000
+                                  },
+                                  "stateOfResidence": "CA"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.results[0].status").value("Validation failed"))
+                .andExpect(jsonPath("$.results[3].description").value("Student Income"))
+                .andExpect(jsonPath("$.results[3].status")
+                        .value("Student income cannot be negative (-500, < 0)"));
+    }
+
+    @Test
+    void reportsInvalidSsn() throws Exception {
+        mockMvc.perform(post("/validate")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "studentInfo": {
+                                    "firstName": "Jane",
+                                    "lastName": "Smith",
+                                    "ssn": "123-456-789",
+                                    "dateOfBirth": "2003-05-15"
+                                  },
+                                  "dependencyStatus": "dependent",
+                                  "maritalStatus": "single",
+                                  "household": {
+                                    "numberInHousehold": 4,
+                                    "numberInCollege": 1
+                                  },
+                                  "income": {
+                                    "studentIncome": 5000,
+                                    "parentIncome": 65000
+                                  },
+                                  "stateOfResidence": "CA"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.results[0].status").value("Validation failed"))
+                .andExpect(jsonPath("$.results[2].description").value("SSN"))
+                .andExpect(jsonPath("$.results[2].status")
+                        .value("Invalid SSN format (expected 9 digits or xxx-xx-xxxx)"));
     }
 
     @Test

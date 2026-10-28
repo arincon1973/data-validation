@@ -13,8 +13,10 @@ public class RulesConfig {
     public List<Rule> rules() {
         return List.of(
                 new AgeRule(),
-                (request, entries, schoolStart) -> true, // placeholder rule 2
-                (request, entries, schoolStart) -> true  // placeholder rule 3
+                new SsnRule(),
+                new StudentIncomeRule(),
+                new StateOfResidenceRule(),
+                new ValidateHousehold()
         );
     }
 }
