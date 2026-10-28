@@ -19,17 +19,17 @@ public class ParentIncomeRule implements Rule {
         if ("dependent".equals(request.dependencyStatus())) {
             Long parentIncome = request.income().parentIncome();
             if (parentIncome == null) {
-                entries.add(new ValidationEntry("Parent Income",
+                entries.add(entry("Parent Income",
                         "Parent income is required for dependent students"));
                 return false;
             }
             if (parentIncome < 0) {
-                entries.add(new ValidationEntry("Parent Income",
+                entries.add(entry("Parent Income",
                         "Parent income cannot be negative (%d, < 0)".formatted(parentIncome)));
                 return false;
             }
         }
-        entries.add(new ValidationEntry("Parent Income", "Valid"));
+        entries.add(valid("Parent Income"));
         return true;
     }
 }

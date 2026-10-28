@@ -26,7 +26,7 @@ class ParentIncomeRuleTests {
         List<ValidationEntry> entries = new ArrayList<>();
 
         assertTrue(rule.validate(request("dependent", 0L), entries, SCHOOL_START));
-        assertEquals(List.of(new ValidationEntry("Parent Income", "Valid")), entries);
+        assertEquals(List.of(new ValidationEntry("Parent Income", "Valid", "N/A")), entries);
     }
 
     @Test
@@ -34,7 +34,7 @@ class ParentIncomeRuleTests {
         List<ValidationEntry> entries = new ArrayList<>();
 
         assertTrue(rule.validate(request("dependent", 65000L), entries, SCHOOL_START));
-        assertEquals(List.of(new ValidationEntry("Parent Income", "Valid")), entries);
+        assertEquals(List.of(new ValidationEntry("Parent Income", "Valid", "N/A")), entries);
     }
 
     @Test
@@ -43,7 +43,7 @@ class ParentIncomeRuleTests {
 
         assertFalse(rule.validate(request("dependent", null), entries, SCHOOL_START));
         assertEquals(List.of(new ValidationEntry("Parent Income",
-                "Parent income is required for dependent students")), entries);
+                "Parent income is required for dependent students", "needs review")), entries);
     }
 
     @Test
@@ -52,7 +52,7 @@ class ParentIncomeRuleTests {
 
         assertFalse(rule.validate(request("dependent", -1L), entries, SCHOOL_START));
         assertEquals(List.of(new ValidationEntry("Parent Income",
-                "Parent income cannot be negative (-1, < 0)")), entries);
+                "Parent income cannot be negative (-1, < 0)", "needs review")), entries);
     }
 
     @Test
@@ -60,7 +60,7 @@ class ParentIncomeRuleTests {
         List<ValidationEntry> entries = new ArrayList<>();
 
         assertTrue(rule.validate(request("independent", null), entries, SCHOOL_START));
-        assertEquals(List.of(new ValidationEntry("Parent Income", "Valid")), entries);
+        assertEquals(List.of(new ValidationEntry("Parent Income", "Valid", "N/A")), entries);
     }
 
     @Test
@@ -68,7 +68,7 @@ class ParentIncomeRuleTests {
         List<ValidationEntry> entries = new ArrayList<>();
 
         assertTrue(rule.validate(request("independent", -1L), entries, SCHOOL_START));
-        assertEquals(List.of(new ValidationEntry("Parent Income", "Valid")), entries);
+        assertEquals(List.of(new ValidationEntry("Parent Income", "Valid", "N/A")), entries);
     }
 
     private static ValidationRequest request(String dependencyStatus, Long parentIncome) {

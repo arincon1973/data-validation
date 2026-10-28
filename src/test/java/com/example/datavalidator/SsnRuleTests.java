@@ -26,7 +26,7 @@ class SsnRuleTests {
         List<ValidationEntry> entries = new ArrayList<>();
 
         assertTrue(rule.validate(requestWithSsn("123-45-6789"), entries, SCHOOL_START));
-        assertEquals(List.of(new ValidationEntry("SSN", "Valid")), entries);
+        assertEquals(List.of(new ValidationEntry("SSN", "Valid", "N/A")), entries);
     }
 
     @Test
@@ -35,7 +35,7 @@ class SsnRuleTests {
 
         assertFalse(rule.validate(requestWithSsn("12345"), entries, SCHOOL_START));
         assertEquals(List.of(new ValidationEntry("SSN",
-                "Invalid SSN format (expected 9 digits or xxx-xx-xxxx)")), entries);
+                "Invalid SSN format (expected 9 digits or xxx-xx-xxxx)", "needs review")), entries);
     }
 
     private static ValidationRequest requestWithSsn(String ssn) {

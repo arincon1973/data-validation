@@ -27,11 +27,11 @@ public class StateOfResidenceRule implements Rule {
         String state = request.stateOfResidence();
 
         if (!STATES.contains(state)) {
-            entries.add(new ValidationEntry("State of Residence",
+            entries.add(entry("State of Residence",
                     "Invalid US state abbreviation (%s)".formatted(state)));
             return false;
         }
-        entries.add(new ValidationEntry("State of Residence", "Valid"));
+        entries.add(valid("State of Residence"));
         return true;
     }
 }

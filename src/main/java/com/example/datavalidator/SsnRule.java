@@ -17,10 +17,10 @@ public class SsnRule implements Rule {
     public boolean validate(ValidationRequest request, List<ValidationEntry> entries, LocalDate schoolStart) {
         // The SSN itself is left out of the message so it doesn't end up in responses or logs.
         if (!SsnValidator.isValid(request.studentInfo().ssn())) {
-            entries.add(new ValidationEntry("SSN", "Invalid SSN format (expected 9 digits or xxx-xx-xxxx)"));
+            entries.add(entry("SSN", "Invalid SSN format (expected 9 digits or xxx-xx-xxxx)"));
             return false;
         }
-        entries.add(new ValidationEntry("SSN", "Valid"));
+        entries.add(valid("SSN"));
         return true;
     }
 }

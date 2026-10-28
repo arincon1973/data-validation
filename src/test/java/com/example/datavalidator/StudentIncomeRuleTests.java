@@ -26,7 +26,7 @@ class StudentIncomeRuleTests {
         List<ValidationEntry> entries = new ArrayList<>();
 
         assertTrue(rule.validate(requestWithStudentIncome(0L), entries, SCHOOL_START));
-        assertEquals(List.of(new ValidationEntry("Student Income", "Valid")), entries);
+        assertEquals(List.of(new ValidationEntry("Student Income", "Valid", "N/A")), entries);
     }
 
     @Test
@@ -34,7 +34,7 @@ class StudentIncomeRuleTests {
         List<ValidationEntry> entries = new ArrayList<>();
 
         assertTrue(rule.validate(requestWithStudentIncome(5000L), entries, SCHOOL_START));
-        assertEquals(List.of(new ValidationEntry("Student Income", "Valid")), entries);
+        assertEquals(List.of(new ValidationEntry("Student Income", "Valid", "N/A")), entries);
     }
 
     @Test
@@ -43,7 +43,7 @@ class StudentIncomeRuleTests {
 
         assertFalse(rule.validate(requestWithStudentIncome(-1L), entries, SCHOOL_START));
         assertEquals(List.of(new ValidationEntry("Student Income",
-                "Student income cannot be negative (-1, < 0)")), entries);
+                "Student income cannot be negative (-1, < 0)", "needs review")), entries);
     }
 
     private static ValidationRequest requestWithStudentIncome(long studentIncome) {

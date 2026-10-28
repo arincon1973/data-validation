@@ -23,16 +23,16 @@ public class AgeRule implements Rule {
         int age = Period.between(dateOfBirth, schoolStart).getYears();
 
         if (age < MIN_AGE) {
-            entries.add(new ValidationEntry("Age",
+            entries.add(entry("Age",
                     "Student too young (%d years old, < %d)".formatted(age, MIN_AGE)));
             return false;
         }
         if (age > MAX_AGE) {
-            entries.add(new ValidationEntry("Age",
+            entries.add(entry("Age",
                     "Student too old (%d years old, > %d)".formatted(age, MAX_AGE)));
             return false;
         }
-        entries.add(new ValidationEntry("Age", "Valid"));
+        entries.add(valid("Age"));
         return true;
     }
 }

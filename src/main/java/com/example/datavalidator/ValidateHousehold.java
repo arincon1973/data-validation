@@ -26,25 +26,25 @@ public class ValidateHousehold implements Rule {
         boolean passed = true;
 
         if (inHousehold < MIN_HOUSEHOLD) {
-            entries.add(new ValidationEntry("Household",
+            entries.add(entry("Household",
                     "Number in household must be at least %d (%d, < %d)"
                             .formatted(MIN_HOUSEHOLD, inHousehold, MIN_HOUSEHOLD)));
             passed = false;
         } else if ("dependent".equals(request.dependencyStatus()) && inHousehold < MIN_DEPENDENT_HOUSEHOLD) {
             // A dependent student lives with at least one parent.
-            entries.add(new ValidationEntry("Household",
+            entries.add(entry("Household",
                     "Dependent student household must have at least %d people (%d, < %d)"
                             .formatted(MIN_DEPENDENT_HOUSEHOLD, inHousehold, MIN_DEPENDENT_HOUSEHOLD)));
             passed = false;
         }
         if (inCollege < MIN_COLLEGE) {
-            entries.add(new ValidationEntry("Household",
+            entries.add(entry("Household",
                     "Number in college must be at least %d (%d, < %d)"
                             .formatted(MIN_COLLEGE, inCollege, MIN_COLLEGE)));
             passed = false;
         }
         if (passed) {
-            entries.add(new ValidationEntry("Household", "Valid"));
+            entries.add(valid("Household"));
         }
         return passed;
     }

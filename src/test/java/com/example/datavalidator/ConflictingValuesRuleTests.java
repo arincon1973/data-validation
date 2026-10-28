@@ -29,7 +29,7 @@ class ConflictingValuesRuleTests {
         List<ValidationEntry> entries = new ArrayList<>();
 
         assertTrue(rule.validate(request(dependencyStatus, maritalStatus), entries, SCHOOL_START));
-        assertEquals(List.of(new ValidationEntry("Conflicting Values", "Valid")), entries);
+        assertEquals(List.of(new ValidationEntry("Conflicting Values", "Valid", "N/A")), entries);
     }
 
     @Test
@@ -38,7 +38,7 @@ class ConflictingValuesRuleTests {
 
         assertFalse(rule.validate(request("dependent", "married"), entries, SCHOOL_START));
         assertEquals(List.of(new ValidationEntry("Conflicting Values",
-                "Student cannot be both dependent and married")), entries);
+                "Student cannot be both dependent and married", "reject")), entries);
     }
 
     private static ValidationRequest request(String dependencyStatus, String maritalStatus) {

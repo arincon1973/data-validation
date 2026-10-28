@@ -26,7 +26,7 @@ class AgeRuleTests {
         List<ValidationEntry> entries = new ArrayList<>();
 
         assertTrue(rule.validate(requestBornOn(LocalDate.of(2013, 9, 1)), entries, SCHOOL_START));
-        assertEquals(List.of(new ValidationEntry("Age", "Valid")), entries);
+        assertEquals(List.of(new ValidationEntry("Age", "Valid", "N/A")), entries);
     }
 
     @Test
@@ -34,7 +34,7 @@ class AgeRuleTests {
         List<ValidationEntry> entries = new ArrayList<>();
 
         assertFalse(rule.validate(requestBornOn(LocalDate.of(2013, 9, 2)), entries, SCHOOL_START));
-        assertEquals(List.of(new ValidationEntry("Age", "Student too young (13 years old, < 14)")), entries);
+        assertEquals(List.of(new ValidationEntry("Age", "Student too young (13 years old, < 14)", "needs review")), entries);
     }
 
     @Test
@@ -42,7 +42,7 @@ class AgeRuleTests {
         List<ValidationEntry> entries = new ArrayList<>();
 
         assertTrue(rule.validate(requestBornOn(LocalDate.of(1907, 6, 1)), entries, SCHOOL_START));
-        assertEquals(List.of(new ValidationEntry("Age", "Valid")), entries);
+        assertEquals(List.of(new ValidationEntry("Age", "Valid", "N/A")), entries);
     }
 
     @Test
@@ -50,7 +50,7 @@ class AgeRuleTests {
         List<ValidationEntry> entries = new ArrayList<>();
 
         assertFalse(rule.validate(requestBornOn(LocalDate.of(1906, 6, 1)), entries, SCHOOL_START));
-        assertEquals(List.of(new ValidationEntry("Age", "Student too old (121 years old, > 120)")), entries);
+        assertEquals(List.of(new ValidationEntry("Age", "Student too old (121 years old, > 120)", "needs review")), entries);
     }
 
     private static ValidationRequest requestBornOn(LocalDate dateOfBirth) {

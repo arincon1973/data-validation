@@ -26,14 +26,14 @@ public class AllowedValuesRule implements Rule {
         return dependencyValid && maritalValid;
     }
 
-    private static boolean check(List<ValidationEntry> entries, String field, String value,
+    private boolean check(List<ValidationEntry> entries, String field, String value,
                                  Set<String> allowed, String expected) {
         if (!allowed.contains(value)) {
-            entries.add(new ValidationEntry(field,
+            entries.add(entry(field,
                     "Invalid value (%s), expected %s".formatted(value, expected)));
             return false;
         }
-        entries.add(new ValidationEntry(field, "Valid"));
+        entries.add(valid(field));
         return true;
     }
 }

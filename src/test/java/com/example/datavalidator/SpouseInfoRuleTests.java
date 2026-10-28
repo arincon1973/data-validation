@@ -28,7 +28,7 @@ class SpouseInfoRuleTests {
 
         assertTrue(rule.validate(request("married", new SpouseInfo("John", "Smith", "987-65-4321")),
                 entries, SCHOOL_START));
-        assertEquals(List.of(new ValidationEntry("Spouse", "Valid")), entries);
+        assertEquals(List.of(new ValidationEntry("Spouse", "Valid", "N/A")), entries);
     }
 
     @Test
@@ -36,7 +36,7 @@ class SpouseInfoRuleTests {
         List<ValidationEntry> entries = new ArrayList<>();
 
         assertTrue(rule.validate(request("single", null), entries, SCHOOL_START));
-        assertEquals(List.of(new ValidationEntry("Spouse", "Valid")), entries);
+        assertEquals(List.of(new ValidationEntry("Spouse", "Valid", "N/A")), entries);
     }
 
     @Test
@@ -44,7 +44,7 @@ class SpouseInfoRuleTests {
         List<ValidationEntry> entries = new ArrayList<>();
 
         assertTrue(rule.validate(request("single", new SpouseInfo(null, null, "bad")), entries, SCHOOL_START));
-        assertEquals(List.of(new ValidationEntry("Spouse", "Valid")), entries);
+        assertEquals(List.of(new ValidationEntry("Spouse", "Valid", "N/A")), entries);
     }
 
     @Test
@@ -53,7 +53,7 @@ class SpouseInfoRuleTests {
 
         assertFalse(rule.validate(request("married", null), entries, SCHOOL_START));
         assertEquals(List.of(new ValidationEntry("Spouse",
-                "Spouse info is required for married students")), entries);
+                "Spouse info is required for married students", "needs review")), entries);
     }
 
     @Test
@@ -62,9 +62,9 @@ class SpouseInfoRuleTests {
 
         assertFalse(rule.validate(request("married", new SpouseInfo(null, " ", null)), entries, SCHOOL_START));
         assertEquals(List.of(
-                new ValidationEntry("Spouse", "Spouse first name is required for married students"),
-                new ValidationEntry("Spouse", "Spouse last name is required for married students"),
-                new ValidationEntry("Spouse", "Spouse SSN is required for married students")), entries);
+                new ValidationEntry("Spouse", "Spouse first name is required for married students", "needs review"),
+                new ValidationEntry("Spouse", "Spouse last name is required for married students", "needs review"),
+                new ValidationEntry("Spouse", "Spouse SSN is required for married students", "needs review")), entries);
     }
 
     @Test
@@ -74,7 +74,7 @@ class SpouseInfoRuleTests {
         assertFalse(rule.validate(request("married", new SpouseInfo("John", "Smith", "98765")),
                 entries, SCHOOL_START));
         assertEquals(List.of(new ValidationEntry("Spouse",
-                "Invalid spouse SSN format (expected 9 digits or xxx-xx-xxxx)")), entries);
+                "Invalid spouse SSN format (expected 9 digits or xxx-xx-xxxx)", "needs review")), entries);
     }
 
     private static ValidationRequest request(String maritalStatus, SpouseInfo spouse) {

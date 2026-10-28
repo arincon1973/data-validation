@@ -16,11 +16,11 @@ public class ConflictingValuesRule implements Rule {
     @Override
     public boolean validate(ValidationRequest request, List<ValidationEntry> entries, LocalDate schoolStart) {
         if ("dependent".equals(request.dependencyStatus()) && "married".equals(request.maritalStatus())) {
-            entries.add(new ValidationEntry("Conflicting Values",
+            entries.add(entry("Conflicting Values",
                     "Student cannot be both dependent and married"));
             return false;
         }
-        entries.add(new ValidationEntry("Conflicting Values", "Valid"));
+        entries.add(valid("Conflicting Values"));
         return true;
     }
 }

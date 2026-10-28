@@ -18,11 +18,11 @@ public class StudentIncomeRule implements Rule {
         long studentIncome = request.income().studentIncome();
 
         if (studentIncome < 0) {
-            entries.add(new ValidationEntry("Student Income",
+            entries.add(entry("Student Income",
                     "Student income cannot be negative (%d, < 0)".formatted(studentIncome)));
             return false;
         }
-        entries.add(new ValidationEntry("Student Income", "Valid"));
+        entries.add(valid("Student Income"));
         return true;
     }
 }

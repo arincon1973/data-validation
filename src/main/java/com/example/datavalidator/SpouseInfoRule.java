@@ -18,36 +18,36 @@ public class SpouseInfoRule implements Rule {
     public boolean validate(ValidationRequest request, List<ValidationEntry> entries, LocalDate schoolStart) {
         // Spouse info only matters for married students.
         if (!"married".equals(request.maritalStatus())) {
-            entries.add(new ValidationEntry("Spouse", "Valid"));
+            entries.add(valid("Spouse"));
             return true;
         }
 
         SpouseInfo spouse = request.spouseInfo();
         if (spouse == null) {
-            entries.add(new ValidationEntry("Spouse", "Spouse info is required for married students"));
+            entries.add(entry("Spouse", "Spouse info is required for married students"));
             return false;
         }
 
         boolean passed = true;
         if (isMissing(spouse.firstName())) {
-            entries.add(new ValidationEntry("Spouse", "Spouse first name is required for married students"));
+            entries.add(entry("Spouse", "Spouse first name is required for married students"));
             passed = false;
         }
         if (isMissing(spouse.lastName())) {
-            entries.add(new ValidationEntry("Spouse", "Spouse last name is required for married students"));
+            entries.add(entry("Spouse", "Spouse last name is required for married students"));
             passed = false;
         }
         if (isMissing(spouse.ssn())) {
-            entries.add(new ValidationEntry("Spouse", "Spouse SSN is required for married students"));
+            entries.add(entry("Spouse", "Spouse SSN is required for married students"));
             passed = false;
         } else if (!SsnValidator.isValid(spouse.ssn())) {
             // The SSN itself is left out of the message so it doesn't end up in responses or logs.
-            entries.add(new ValidationEntry("Spouse",
+            entries.add(entry("Spouse",
                     "Invalid spouse SSN format (expected 9 digits or xxx-xx-xxxx)"));
             passed = false;
         }
         if (passed) {
-            entries.add(new ValidationEntry("Spouse", "Valid"));
+            entries.add(valid("Spouse"));
         }
         return passed;
     }

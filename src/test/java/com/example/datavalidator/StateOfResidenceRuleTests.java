@@ -28,7 +28,7 @@ class StateOfResidenceRuleTests {
         List<ValidationEntry> entries = new ArrayList<>();
 
         assertTrue(rule.validate(requestFrom(state), entries, SCHOOL_START));
-        assertEquals(List.of(new ValidationEntry("State of Residence", "Valid")), entries);
+        assertEquals(List.of(new ValidationEntry("State of Residence", "Valid", "N/A")), entries);
     }
 
     @ParameterizedTest
@@ -38,7 +38,7 @@ class StateOfResidenceRuleTests {
 
         assertFalse(rule.validate(requestFrom(state), entries, SCHOOL_START));
         assertEquals(List.of(new ValidationEntry("State of Residence",
-                "Invalid US state abbreviation (" + state + ")")), entries);
+                "Invalid US state abbreviation (" + state + ")", "needs review")), entries);
     }
 
     private static ValidationRequest requestFrom(String state) {

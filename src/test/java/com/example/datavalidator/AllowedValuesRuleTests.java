@@ -30,8 +30,8 @@ class AllowedValuesRuleTests {
 
         assertTrue(rule.validate(request(dependencyStatus, maritalStatus), entries, SCHOOL_START));
         assertEquals(List.of(
-                new ValidationEntry("Dependency Status", "Valid"),
-                new ValidationEntry("Marital Status", "Valid")), entries);
+                new ValidationEntry("Dependency Status", "Valid", "N/A"),
+                new ValidationEntry("Marital Status", "Valid", "N/A")), entries);
     }
 
     @Test
@@ -41,8 +41,8 @@ class AllowedValuesRuleTests {
         assertFalse(rule.validate(request("Dependent", "single"), entries, SCHOOL_START));
         assertEquals(List.of(
                 new ValidationEntry("Dependency Status",
-                        "Invalid value (Dependent), expected dependent or independent"),
-                new ValidationEntry("Marital Status", "Valid")), entries);
+                        "Invalid value (Dependent), expected dependent or independent", "reject"),
+                new ValidationEntry("Marital Status", "Valid", "N/A")), entries);
     }
 
     @Test
@@ -51,9 +51,9 @@ class AllowedValuesRuleTests {
 
         assertFalse(rule.validate(request("dependent", "divorced"), entries, SCHOOL_START));
         assertEquals(List.of(
-                new ValidationEntry("Dependency Status", "Valid"),
+                new ValidationEntry("Dependency Status", "Valid", "N/A"),
                 new ValidationEntry("Marital Status",
-                        "Invalid value (divorced), expected single or married")), entries);
+                        "Invalid value (divorced), expected single or married", "reject")), entries);
     }
 
     @Test
@@ -63,9 +63,9 @@ class AllowedValuesRuleTests {
         assertFalse(rule.validate(request("", "unknown"), entries, SCHOOL_START));
         assertEquals(List.of(
                 new ValidationEntry("Dependency Status",
-                        "Invalid value (), expected dependent or independent"),
+                        "Invalid value (), expected dependent or independent", "reject"),
                 new ValidationEntry("Marital Status",
-                        "Invalid value (unknown), expected single or married")), entries);
+                        "Invalid value (unknown), expected single or married", "reject")), entries);
     }
 
     private static ValidationRequest request(String dependencyStatus, String maritalStatus) {

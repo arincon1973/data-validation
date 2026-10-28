@@ -94,6 +94,7 @@ class DataValidatorControllerTests {
                 .andExpect(jsonPath("$.results.length()").value(11))
                 .andExpect(jsonPath("$.results[0].description").value("Status"))
                 .andExpect(jsonPath("$.results[0].status").value("Validation passed"))
+                .andExpect(jsonPath("$.results[0].severity").value("all valid"))
                 .andExpect(jsonPath("$.results[1].description").value("Dependency Status"))
                 .andExpect(jsonPath("$.results[1].status").value("Valid"))
                 .andExpect(jsonPath("$.results[2].description").value("Marital Status"))
@@ -175,6 +176,43 @@ class DataValidatorControllerTests {
                 .andExpect(jsonPath("$.results[0].status").value("Validation failed"))
                 .andExpect(jsonPath("$.results[3].description").value("Conflicting Values"))
                 .andExpect(jsonPath("$.results[3].status").value("Student cannot be both dependent and married"));
+    }
+
+    @Test
+    void setsSeverityFromRuleOrder() throws Exception {
+        mockMvc.perform(post("/validate")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "studentInfo": {
+                                    "firstName": "Jane",
+                                    "lastName": "Smith",
+                                    "ssn": "123-456-789",
+                                    "dateOfBirth": "2003-05-15"
+                                  },
+                                  "dependencyStatus": "dependent",
+                                  "maritalStatus": "married",
+                                  "household": {
+                                    "numberInHousehold": 4,
+                                    "numberInCollege": 1
+                                  },
+                                  "income": {
+                                    "studentIncome": 5000,
+                                    "parentIncome": 65000
+                                  },
+                                  "stateOfResidence": "CA"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.results[0].severity").value("invalid"))
+                .andExpect(jsonPath("$.results[1].description").value("Dependency Status"))
+                .andExpect(jsonPath("$.results[1].severity").value("N/A"))
+                .andExpect(jsonPath("$.results[3].description").value("Conflicting Values"))
+                .andExpect(jsonPath("$.results[3].severity").value("reject"))
+                .andExpect(jsonPath("$.results[4].description").value("Age"))
+                .andExpect(jsonPath("$.results[4].severity").value("N/A"))
+                .andExpect(jsonPath("$.results[5].description").value("SSN"))
+                .andExpect(jsonPath("$.results[5].severity").value("needs review"));
     }
 
     @Test

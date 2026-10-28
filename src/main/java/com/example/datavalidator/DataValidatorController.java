@@ -47,7 +47,7 @@ public class DataValidatorController {
             @NotNull String stateOfResidence,
             SpouseInfo spouseInfo) {}
 
-    public record ValidationEntry(String description, String status) {}
+    public record ValidationEntry(String description, String status, String severity) {}
 
     public record ValidationResponse(List<ValidationEntry> results) {}
 
@@ -65,7 +65,9 @@ public class DataValidatorController {
                 allPassed = false;
             }
         }
-        entries.add(0, new ValidationEntry("Status", allPassed ? "Validation passed" : "Validation failed"));
+        entries.add(0, allPassed
+                ? new ValidationEntry("Status", "Validation passed", "all valid")
+                : new ValidationEntry("Status", "Validation failed", "invalid"));
         return new ValidationResponse(entries);
     }
 }

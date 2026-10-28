@@ -26,7 +26,7 @@ class ValidateHouseholdTests {
         List<ValidationEntry> entries = new ArrayList<>();
 
         assertTrue(rule.validate(request("dependent", 2, 1), entries, SCHOOL_START));
-        assertEquals(List.of(new ValidationEntry("Household", "Valid")), entries);
+        assertEquals(List.of(new ValidationEntry("Household", "Valid", "N/A")), entries);
     }
 
     @Test
@@ -34,7 +34,7 @@ class ValidateHouseholdTests {
         List<ValidationEntry> entries = new ArrayList<>();
 
         assertTrue(rule.validate(request("independent", 1, 1), entries, SCHOOL_START));
-        assertEquals(List.of(new ValidationEntry("Household", "Valid")), entries);
+        assertEquals(List.of(new ValidationEntry("Household", "Valid", "N/A")), entries);
     }
 
     @Test
@@ -43,7 +43,7 @@ class ValidateHouseholdTests {
 
         assertFalse(rule.validate(request("independent", 0, 1), entries, SCHOOL_START));
         assertEquals(List.of(new ValidationEntry("Household",
-                "Number in household must be at least 1 (0, < 1)")), entries);
+                "Number in household must be at least 1 (0, < 1)", "needs review")), entries);
     }
 
     @Test
@@ -52,7 +52,7 @@ class ValidateHouseholdTests {
 
         assertFalse(rule.validate(request("dependent", 1, 1), entries, SCHOOL_START));
         assertEquals(List.of(new ValidationEntry("Household",
-                "Dependent student household must have at least 2 people (1, < 2)")), entries);
+                "Dependent student household must have at least 2 people (1, < 2)", "needs review")), entries);
     }
 
     @Test
@@ -61,7 +61,7 @@ class ValidateHouseholdTests {
 
         assertFalse(rule.validate(request("dependent", 4, 0), entries, SCHOOL_START));
         assertEquals(List.of(new ValidationEntry("Household",
-                "Number in college must be at least 1 (0, < 1)")), entries);
+                "Number in college must be at least 1 (0, < 1)", "needs review")), entries);
     }
 
     @Test
@@ -71,9 +71,9 @@ class ValidateHouseholdTests {
         assertFalse(rule.validate(request("dependent", 1, 0), entries, SCHOOL_START));
         assertEquals(List.of(
                 new ValidationEntry("Household",
-                        "Dependent student household must have at least 2 people (1, < 2)"),
+                        "Dependent student household must have at least 2 people (1, < 2)", "needs review"),
                 new ValidationEntry("Household",
-                        "Number in college must be at least 1 (0, < 1)")), entries);
+                        "Number in college must be at least 1 (0, < 1)", "needs review")), entries);
     }
 
     private static ValidationRequest request(String dependencyStatus, int inHousehold, int inCollege) {
