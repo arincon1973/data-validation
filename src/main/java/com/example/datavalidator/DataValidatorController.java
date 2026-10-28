@@ -1,16 +1,26 @@
 package com.example.datavalidator;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDate;
-import java.util.List;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 
 @RestController
 public class DataValidatorController {
+
+    private static final LocalDate SCHOOL_START = LocalDate.of(2027, 9, 1);
+
+    private final List<Rule> rules;
+
+    public DataValidatorController(List<Rule> rules) {
+        this.rules = rules;
+    }
 
     public record StudentInfo(
             @NotNull String firstName,
@@ -20,7 +30,9 @@ public class DataValidatorController {
 
     public record Household(@NotNull Integer numberInHousehold, @NotNull Integer numberInCollege) {}
 
-    public record Income(@NotNull Long studentIncome, @NotNull Long parentIncome) {}
+    public record Income(@NotNull Long studentIncome, Long parentIncome) {}
+
+    public record SpouseInfo(String firstName, String lastName, String ssn) {}
 
     public record ValidationRequest(
             @NotNull @Valid StudentInfo studentInfo,
@@ -28,7 +40,8 @@ public class DataValidatorController {
             @NotNull String maritalStatus,
             @NotNull @Valid Household household,
             @NotNull @Valid Income income,
-            @NotNull String stateOfResidence) {}
+            @NotNull String stateOfResidence,
+            SpouseInfo spouseInfo) {}
 
     public record ValidationEntry(String description, String status) {}
 
@@ -36,24 +49,14 @@ public class DataValidatorController {
 
     @PostMapping("/validate")
     public ValidationResponse validate(@Valid @RequestBody ValidationRequest request) {
-        StudentInfo student = request.studentInfo();
-        Household household = request.household();
-        Income income = request.income();
-        return new ValidationResponse(List.of(
-                entry("studentInfo:firstName", student.firstName()),
-                entry("studentInfo:lastName", student.lastName()),
-                entry("studentInfo:ssn", student.ssn()),
-                entry("studentInfo:dateOfBirth", student.dateOfBirth()),
-                entry("dependencyStatus", request.dependencyStatus()),
-                entry("maritalStatus", request.maritalStatus()),
-                entry("household:numberInHousehold", household.numberInHousehold()),
-                entry("household:numberInCollege", household.numberInCollege()),
-                entry("income:studentIncome", income.studentIncome()),
-                entry("income:parentIncome", income.parentIncome()),
-                entry("stateOfResidence", request.stateOfResidence())));
-    }
-
-    private static ValidationEntry entry(String field, Object value) {
-        return new ValidationEntry(field, String.valueOf(value));
+        List<ValidationEntry> entries = new ArrayList<>();
+        boolean allPassed = true;
+        for (Rule rule : rules) {
+            if (!rule.validate(request, entries, SCHOOL_START)) {
+                allPassed = false;
+            }
+        }
+        entries.add(0, new ValidationEntry("Status", allPassed ? "Validation passed" : "Validation failed"));
+        return new ValidationResponse(entries);
     }
 }
